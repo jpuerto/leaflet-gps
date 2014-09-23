@@ -1,5 +1,5 @@
 /* 
- * Leaflet Control GPS v1.0.0 - 2014-09-05 
+ * Leaflet Control GPS v1.0.0 - 2014-09-23 
  * 
  * Copyright 2014 Stefano Cudini 
  * stefano.cudini@gmail.com 
@@ -46,7 +46,9 @@
         color: '#e03',
         fill: false},
       title: 'Center map on your location',
-      position: 'bottomright'
+      position: 'bottomright',
+      imgSourceInactive: 'images/gps-icon.svg',
+      imgSourceActive: 'images/gps-icon-active.svg',
               //TODO add gpsLayer
               //TODO timeout autoCenter
     },
@@ -68,6 +70,11 @@
       this._button = L.DomUtil.create('a', 'gps-button', container);
       this._button.href = '#';
       this._button.title = this.options.title;
+      this._image = L.DomUtil.create('img', 'gps-button-image', this._button);
+      this._image.src = this.options.imgSourceInactive;
+      this._resizeIcon();
+      L.DomEvent
+              .on(this._map, 'resize', this._resizeIcon, this);
       L.DomEvent
               .on(this._button, 'click', L.DomEvent.stop, this)
               .on(this._button, 'click', this._switchGps, this);
@@ -87,6 +94,15 @@
         this.activate();
 
       return container;
+    },
+    _resizeIcon: function () {
+      var size = this._map.getSize(),
+          min = size.x < size.y?size.x:size.y,
+          targetSize = Math.round(min * 0.1);
+      this._image.height = targetSize;
+      this._image.width = targetSize;
+      this._button.style.height = targetSize + 'px';
+      this._button.style.width = targetSize + 'px';
     },
     _updateRadius: function (event) {
       var newZoom = this._map.getZoom(),
@@ -140,7 +156,7 @@
 
       this.fire('gpslocated', {latlng: e.latlng, marker: this._gpsMarker});
 
-      L.DomUtil.addClass(this._button, 'active');
+      this._image.src = this.options.imgSourceActive;
     },
     _moveTo: function(latlng) {
       this._firstMoved = true;
